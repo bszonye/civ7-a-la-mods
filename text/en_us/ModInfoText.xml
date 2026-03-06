@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Database>
+    <EnglishText>
+        <Row Tag="LOC_MOD_BZ_A_LA_MODS_NAME">
+            <Text>A la Mods</Text>
+        </Row>
+        <Row Tag="LOC_MOD_BZ_A_LA_MODS_DESCRIPTION">
+            <Text>better add-ons panel</Text>
+        </Row>
+    </EnglishText>
+</Database>

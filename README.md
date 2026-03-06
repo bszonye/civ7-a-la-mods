@@ -1,2 +1,2 @@
-# civ7-a-la-mods
-A la Mods mod for Civilization VII
+# A la Mods 1.0.0
+better add-ons panel for Civilization VII
