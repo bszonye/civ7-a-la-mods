@@ -14,6 +14,10 @@ const BZ_HEAD_STYLE = [
 .additional-content-mods fxs-vslot.w-1\\/4 {
     margin-top: -1.1111111111rem;
 }
+.additional-content-mods .size-6 {
+    width: 1.3333333333em;
+    height: 1.3333333333em;
+}
 .additional-content-mods .bz-even-row, .additional-content-mods .bz-odd-row {
     /* border-radius: 1em 0 0 1em; */
 }

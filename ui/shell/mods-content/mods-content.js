@@ -147,10 +147,15 @@ class ModsContent extends Panel {
     installedMods.sort((a, b) => Locale.compare(a.name, b.name));
     const toggleEnableButton = MustGetElement(".toggle-enable", this.Root);
     toggleEnableButton.addEventListener("action-activate", this.modToggledActivateListener);
+    // find selected mod, or find this mod
     if (this.selectedModHandle != null) {
       if (installedMods.findIndex((m) => m.handle == this.selectedModHandle) == -1) {
         this.selectedModHandle = null;
       }
+    }
+    if (this.selectedModHandle == null) {
+      this.selectedMod = installedMods.find(m => m.id == "bz-a-la-mods");
+      this.selectedModHandle = this.selectedMod?.handle ?? null;
     }
     // blank the screen if there are no mods to show
     modsContent.classList.toggle("hidden", installedMods.length == 0);
@@ -158,10 +163,6 @@ class ModsContent extends Panel {
     // only show the requested (un)official half of the list
     installedMods = installedMods.filter((m) => m.official == official);
     if (!installedMods.length) return;
-    if (this.selectedModHandle == null) {
-      this.selectedModHandle = installedMods[0].handle;
-      this.selectedMod = installedMods[0];
-    }
     installedMods.forEach((mod, index) => {
       const globalIndex = baseIndex + index;
       const modentry = document.createElement("fxs-activatable");
@@ -209,7 +210,8 @@ class ModsContent extends Panel {
       switch (mod.subscriptionType) {
         case "OfficialContent":
           modIcon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
-          modIcon.style.filter = shadow;
+          modIcon.style.filter =
+            `brightness(1.25) contrast(1.25) ${shadow}`;
           break;
         case "SteamWorkshopContent":
           modIcon.style.backgroundImage = UI.getIconCSS("mod-workshop");
@@ -219,7 +221,8 @@ class ModsContent extends Panel {
         case "CommunityContent":
         default:
           modIcon.style.backgroundImage = UI.getIconCSS("mod");
-          modIcon.style.filter = shadow;
+          modIcon.style.filter =
+            `fxs-color-tint(#fac) brightness(1.75) contrast(1.25) ${shadow}`;
       }
       modTextContainer.appendChild(modIcon);
       const modName = document.createElement("div");
