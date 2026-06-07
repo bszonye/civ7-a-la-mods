@@ -146,85 +146,86 @@ class ModsContent extends Panel {
         this.selectedModHandle = null;
       }
     }
-    if (this.selectedModHandle == null) {
-      this.selectedMod = installedMods.find(m => m.id == "bz-a-la-mods");
-      this.selectedModHandle = this.selectedMod?.handle ?? null;
-    }
     // blank the screen if there are no mods to show
     modsContent.classList.toggle("hidden", installedMods.length == 0);
     modsContentEmpty.classList.toggle("hidden", installedMods.length > 0);
-    // only show the requested (un)official half of the list
-    installedMods = installedMods.filter((m) => m.official == official);
-    if (!installedMods.length) return;
-    installedMods.forEach((mod, index) => {
-      const globalIndex = baseIndex + index;
-      const modentry = document.createElement("fxs-activatable");
-      modentry.classList.add("mod-entry");
-      modentry.classList.add(index % 2 === 0 ? "bz-even-row" : "bz-odd-row");
-      modentry.style.display = "flex";
-      modentry.style.alignItems = "center";
-      modList.appendChild(modentry);
-      modentry.setAttribute("mod-handle", mod.handle.toString());
-      modentry.setAttribute("tabindex", "-1");
-      modentry.setAttribute("index", `${globalIndex}`);
-      modentry.setAttribute("mod-handle", mod.handle.toString());
-      modentry.addEventListener("action-activate", this.onModActivateListener);
-      modentry.addEventListener("focus", this.onModFocusListener);
-      if (this.selectedModHandle == mod.handle) {
-        this.selectedMod = mod;
-        FocusManager.setFocus(modentry);
+    if (installedMods.length > 0) {
+      if (this.selectedModHandle == null) {
+        this.selectedMod = installedMods.find(m => m.id == "bz-a-la-mods");
+        this.selectedModHandle = this.selectedMod?.handle ?? null;
       }
-      const checkbox = document.createElement("fxs-checkbox");
-      checkbox.className = "mod-checkbox-enabled scale-90 origin-center ml-0\\.5";
-      if (mod.enabled) checkbox.setAttribute("selected", "true");
-      const handle = mod.handle;
-      checkbox.addEventListener("action-activate", () => {
-        const mod2 = Modding.getModInfo(handle);
-        if (!mod2) return;
-        this.handleSpecificModToggle(mod2.enabled, handle, globalIndex);
+      // only show the requested (un)official half of the list
+      installedMods = installedMods.filter((m) => m.official == official);
+      installedMods.forEach((mod, index) => {
+        const globalIndex = baseIndex + index;
+        const modentry = document.createElement("fxs-activatable");
+        modentry.classList.add("mod-entry");
+        modentry.classList.add(index % 2 === 0 ? "bz-even-row" : "bz-odd-row");
+        modentry.style.display = "flex";
+        modentry.style.alignItems = "center";
+        modList.appendChild(modentry);
+        modentry.setAttribute("mod-handle", mod.handle.toString());
+        modentry.setAttribute("tabindex", "-1");
+        modentry.setAttribute("index", `${globalIndex}`);
+        modentry.setAttribute("mod-handle", mod.handle.toString());
+        modentry.addEventListener("action-activate", this.onModActivateListener);
+        modentry.addEventListener("focus", this.onModFocusListener);
+        if (this.selectedModHandle == mod.handle) {
+          this.selectedMod = mod;
+          FocusManager.get().setFocus(modentry);
+        }
+        const checkbox = document.createElement("fxs-checkbox");
+        checkbox.className = "mod-checkbox-enabled scale-90 origin-center ml-0\\.5";
+        if (mod.enabled) checkbox.setAttribute("selected", "true");
+        const handle = mod.handle;
+        checkbox.addEventListener("action-activate", () => {
+          const mod2 = Modding.getModInfo(handle);
+          if (!mod2) return;
+          this.handleSpecificModToggle(mod2.enabled, handle, globalIndex);
+        });
+        const modTextContainer = document.createElement("div");
+        modTextContainer.classList.add(
+          "mod-text-container",
+          "relative",
+          "flex",
+          "justify-start",
+          "items-center",
+          "pointer-events-none",
+          "w-full",
+          "shrink",
+          "leading-normal",
+          "p-1",
+          "truncate",
+        );
+        const modIcon = document.createElement("div");
+        modIcon.className = "size-6 mr-2 bg-contain bg-center bg-no-repeat";
+        const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
+        switch (mod.subscriptionType) {
+          case "OfficialContent":
+            modIcon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
+            modIcon.style.filter =
+              `brightness(1.25) contrast(1.25) ${shadow}`;
+            break;
+          case "SteamWorkshopContent":
+            modIcon.style.backgroundImage = UI.getIconCSS("mod-workshop");
+            modIcon.style.filter =
+              `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
+            break;
+          case "CommunityContent":
+          default:
+            modIcon.style.backgroundImage = UI.getIconCSS("mod");
+            modIcon.style.filter =
+              `fxs-color-tint(#fac) brightness(1.75) contrast(1.25) ${shadow}`;
+        }
+        modTextContainer.appendChild(modIcon);
+        const modName = document.createElement("div");
+        modName.classList.add("mod-text-name", "relative", "flex", "grow", "shrink", "text-sm");
+        modName.innerHTML = Locale.stylize(mod.name);
+        modTextContainer.appendChild(modName);
+        modentry.appendChild(modTextContainer);
+        modentry.appendChild(checkbox);
       });
-      const modTextContainer = document.createElement("div");
-      modTextContainer.classList.add(
-        "mod-text-container",
-        "relative",
-        "flex",
-        "justify-start",
-        "items-center",
-        "pointer-events-none",
-        "w-full",
-        "shrink",
-        "leading-normal",
-        "p-1",
-        "truncate",
-      );
-      const modIcon = document.createElement("div");
-      modIcon.className = "size-6 mr-2 bg-contain bg-center bg-no-repeat";
-      const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
-      switch (mod.subscriptionType) {
-        case "OfficialContent":
-          modIcon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
-          modIcon.style.filter =
-            `brightness(1.25) contrast(1.25) ${shadow}`;
-          break;
-        case "SteamWorkshopContent":
-          modIcon.style.backgroundImage = UI.getIconCSS("mod-workshop");
-          modIcon.style.filter =
-            `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
-          break;
-        case "CommunityContent":
-        default:
-          modIcon.style.backgroundImage = UI.getIconCSS("mod");
-          modIcon.style.filter =
-            `fxs-color-tint(#fac) brightness(1.75) contrast(1.25) ${shadow}`;
-      }
-      modTextContainer.appendChild(modIcon);
-      const modName = document.createElement("div");
-      modName.classList.add("mod-text-name", "relative", "flex", "grow", "shrink", "text-sm");
-      modName.innerHTML = Locale.stylize(mod.name);
-      modTextContainer.appendChild(modName);
-      modentry.appendChild(modTextContainer);
-      modentry.appendChild(checkbox);
-    });
+    }
   }
   onAttach() {
     super.onAttach();
