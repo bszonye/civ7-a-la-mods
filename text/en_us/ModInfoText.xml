@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Database>
+    <EnglishText>
+        <Row Tag="LOC_MOD_BZ_A_LA_MODS_NAME">
+            <Text>A la Mods</Text>
+        </Row>
+        <Row Tag="LOC_MOD_BZ_A_LA_MODS_DESCRIPTION">
+            <Text>better add-ons panel[n] [n][style:fxs-header font-title-lg font-bold uppercase tracking-25]features[/style][n][blist][li] separate checklists for official and user content[li] compact layout with up to 60 add-ons visible at once[li] clear, colorful icons for different add-on types[li] right-click to exit panel[li] graphics and AI benchmarks hidden[/blist]</Text>
+        </Row>
+    </EnglishText>
+</Database>

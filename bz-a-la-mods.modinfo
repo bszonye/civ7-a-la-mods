@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="bz-a-la-mods" version="10000" xmlns="ModInfo">
+    <Properties>
+        <Name>LOC_MOD_BZ_A_LA_MODS_NAME</Name>
+        <Version>1.0.0</Version>
+        <Description>LOC_MOD_BZ_A_LA_MODS_DESCRIPTION</Description>
+        <Authors>beezany</Authors>
+        <Package>Mod</Package>
+        <AffectsSavedGames>0</AffectsSavedGames>
+    </Properties>
+    <Dependencies>
+        <Mod id="base-standard" title="LOC_MODULE_BASE_STANDARD_NAME" />
+    </Dependencies>
+    <References>
+    </References>
+    <ActionCriteria>
+        <Criteria id="always">
+            <AlwaysMet/>
+        </Criteria>
+    </ActionCriteria>
+    <ActionGroups>
+        <ActionGroup id="bz-shell-extras" scope="shell" criteria="always">
+            <Properties>
+                <LoadOrder>10000</LoadOrder>
+            </Properties>
+            <Actions>
+                <ImportFiles>
+                    <Item>ui/shell/mods-content/mods-content.js</Item>
+                </ImportFiles>
+                <UIScripts>
+                    <Item>ui/shell/bz-extras.js</Item>
+                </UIScripts>
+            </Actions>
+        </ActionGroup>
+    </ActionGroups>
+    <LocalizedText>
+        <File>text/en_us/ModInfoText.xml</File>
+    </LocalizedText>
+</Mod>
