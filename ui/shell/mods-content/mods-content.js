@@ -5,6 +5,26 @@ import Panel from '../../panel-support.js';
 import { MustGetElement } from '../../utilities/utilities-dom.js';
 import { FocusManager } from '../../../ui-next/services/focus-manager.js';
 
+function styleTypeIcon(icon, type) {
+  const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
+  switch (type) {
+    case "OfficialContent":
+      icon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
+      icon.style.filter =
+        `brightness(1.25) contrast(1.25) ${shadow}`;
+      break;
+    case "SteamWorkshopContent":
+      icon.style.backgroundImage = UI.getIconCSS("mod-workshop");
+      icon.style.filter =
+        `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
+      break;
+    case "CommunityContent":
+    default:
+      icon.style.backgroundImage = UI.getIconCSS("mod");
+      icon.style.filter =
+        `fxs-color-tint(#fac) brightness(1.75) contrast(1.25) ${shadow}`;
+  }
+}
 function compareInstalledMods(a, b) {
   if (a.length != b.length) {
     return false;
@@ -48,6 +68,7 @@ class ModsContent extends Panel {
     super.onInitialize();
     this.Root.innerHTML = this.getContent();
     this.mainSlot = MustGetElement(".additional-content-mods", this.Root);
+    this.modTypeIcon = MustGetElement(".mod-type-icon", this.Root);
     this.modNameHeader = MustGetElement(".selected-mod-name", this.Root);
     this.modDateText = MustGetElement(".mod-date", this.Root);
     this.modDescriptionText = MustGetElement(".mod-description", this.Root);
@@ -76,6 +97,7 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
+							<p class="mod-type-icon size-12 bg-contain bg-center bg-no-repeat self-center mb-3"></p>
 							<fxs-header filigree-style="none"
 										class="selected-mod-name relative flex justify-center font-title text-2xl uppercase text-secondary mb-3"></fxs-header>
 							<p class="mod-description text-lg my-6"></p>
@@ -199,24 +221,7 @@ class ModsContent extends Panel {
         );
         const modIcon = document.createElement("div");
         modIcon.className = "size-6 mr-2 bg-contain bg-center bg-no-repeat";
-        const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
-        switch (mod.subscriptionType) {
-          case "OfficialContent":
-            modIcon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
-            modIcon.style.filter =
-              `brightness(1.25) contrast(1.25) ${shadow}`;
-            break;
-          case "SteamWorkshopContent":
-            modIcon.style.backgroundImage = UI.getIconCSS("mod-workshop");
-            modIcon.style.filter =
-              `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
-            break;
-          case "CommunityContent":
-          default:
-            modIcon.style.backgroundImage = UI.getIconCSS("mod");
-            modIcon.style.filter =
-              `fxs-color-tint(#fac) brightness(1.75) contrast(1.25) ${shadow}`;
-        }
+        styleTypeIcon(modIcon, mod.subscriptionType);
         modTextContainer.appendChild(modIcon);
         const modName = document.createElement("div");
         modName.classList.add("mod-text-name", "relative", "flex", "grow", "shrink", "text-sm");
@@ -276,6 +281,7 @@ class ModsContent extends Panel {
       return;
     }
     const mod = this.selectedMod;
+    styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
     this.modNameHeader.setAttribute("title", mod.name);
     const authorElement = this.Root.querySelector(".mod-author");
     if (authorElement) {
