@@ -1,4 +1,4 @@
-# A la Mods 1.0.0
+# A la Mods 1.1.0
 better add-ons panel
 
 - separate checklists for official and user content
