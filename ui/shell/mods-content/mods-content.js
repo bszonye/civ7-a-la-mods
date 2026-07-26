@@ -4,6 +4,7 @@ import NavTray from '../../navigation-tray/model-navigation-tray.js';
 import Panel from '../../panel-support.js';
 import { MustGetElement } from '../../utilities/utilities-dom.js';
 import { FocusManager } from '../../../ui-next/services/focus-manager.js';
+import { ComponentUtilities } from '../../../ui-next/utilities/component-utilities.js';
 
 function styleTypeIcon(icon, type) {
   const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
@@ -182,6 +183,7 @@ class ModsContent extends Panel {
         this.selectedModHandle = this.selectedMod?.handle ?? null;
       }
       // only show the requested (un)official half of the list
+      const icons = [];
       installedMods = installedMods.filter((m) => m.official == official);
       installedMods.forEach((mod, index) => {
         const globalIndex = baseIndex + index;
@@ -234,7 +236,12 @@ class ModsContent extends Panel {
         modTextContainer.appendChild(modName);
         modentry.appendChild(modTextContainer);
         modentry.appendChild(checkbox);
+        // preload icons
+        const icon = Modding.getModProperty(mod.handle, "bzIcon");
+        const iconBLP = icon?.startsWith("blp:") ? icon : UI.getIconBLP(icon);
+        if (iconBLP) icons.push(iconBLP);
       });
+      ComponentUtilities.preloadImages(...icons);
     }
   }
   onAttach() {
