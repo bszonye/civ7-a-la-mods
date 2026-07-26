@@ -68,6 +68,7 @@ class ModsContent extends Panel {
     super.onInitialize();
     this.Root.innerHTML = this.getContent();
     this.mainSlot = MustGetElement(".additional-content-mods", this.Root);
+    this.modTypeIconBG = MustGetElement(".mod-type-icon-bg", this.Root);
     this.modTypeIcon = MustGetElement(".mod-type-icon", this.Root);
     this.modNameHeader = MustGetElement(".selected-mod-name", this.Root);
     this.modDateText = MustGetElement(".mod-date", this.Root);
@@ -97,7 +98,9 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
-							<p class="mod-type-icon size-12 bg-contain bg-center bg-no-repeat self-center mb-3"></p>
+							<div class="mod-type-icon-bg relative size-64 bg-contain bg-center bg-no-repeat self-center mb-3">
+								<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
+							</div>
 							<fxs-header filigree-style="none"
 										class="selected-mod-name relative flex justify-center font-title text-2xl uppercase text-secondary mb-3"></fxs-header>
 							<p class="mod-description text-lg my-6"></p>
@@ -281,7 +284,52 @@ class ModsContent extends Panel {
       return;
     }
     const mod = this.selectedMod;
-    styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
+    this.modTypeIconBG.style.backgroundImage = UI.getIconCSS("BUILDING_OPEN");
+
+    // TODO: clean background and crop marks
+    this.modTypeIconBG.style.backgroundColor = "black";
+    this.modTypeIconBG.style.filter = "drop-shadow(6px 6px magenta) drop-shadow(-6px -6px magenta)";
+    this.modTypeIconBG.style.margin = "6px";
+
+    // styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
+
+    // TODO: alternate icons
+    // this.modTypeIcon.style.backgroundImage = "url(blp:city_buildingslist)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_action_found_city_128)";
+    this.modTypeIcon.style.backgroundImage = "url(blp:fi_city_urban_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Food_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Production_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Gold_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Science_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Culture_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Happiness_128)";
+    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_yield_diplomacy_128)";
+    // this.modTypeIcon.style.backgroundColor = "magenta";
+
+    // TODO: drop shadow
+    this.modTypeIcon.style.filter = "drop-shadow(3px 3px 6px black)";  // size-128, blur only
+    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(6px 6px black) drop-shadow(6px 6px 12px black)";  // size-128
+    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(3px 3px black) drop-shadow(3px 3px 6px black)";  // size-64
+    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(2px 2px black) drop-shadow(2px 2px 3px black)";  // size-32
+    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(1px 1px black) drop-shadow(1px 1px 2px black)";  // size-16
+
+    // TODO: two-thirds fit (yield fonticons)
+    this.modTypeIcon.style.widthPERCENT = 66.666;
+    this.modTypeIcon.style.heightPERCENT = 66.666;
+    this.modTypeIcon.style.leftPERCENT = 16.667;
+    this.modTypeIcon.style.topPERCENT = 16.667;
+    this.modTypeIcon.style.clipPath = "circle(65% at center)";
+
+    // TODO: three-quarter fit
+    // this.modTypeIcon.style.widthPERCENT = 75;
+    // this.modTypeIcon.style.heightPERCENT = 75;
+    // this.modTypeIcon.style.leftPERCENT = 12.5;
+    // this.modTypeIcon.style.topPERCENT = 12.5;
+    // this.modTypeIcon.style.clipPath = "circle(58% at center)";
+
+    // TODO: three-quarter crop (list button icons)
+    // this.modTypeIcon.style.clipPath = "circle(37% at center)";
+
     this.modNameHeader.setAttribute("title", mod.name);
     const authorElement = this.Root.querySelector(".mod-author");
     if (authorElement) {
@@ -502,3 +550,4 @@ Controls.define("mods-content", {
 
 export { ModsContent };
 //# sourceMappingURL=mods-content.js.map
+// vim: ts=2 sw=2 et
