@@ -296,16 +296,18 @@ class ModsContent extends Panel {
     const icon = Modding.getModProperty(mod.handle, "bzIcon");
     const iconCSS = icon?.startsWith("blp:") ? `url(${icon})` : UI.getIconCSS(icon);
     if (iconCSS) {
-      // icon path
-      console.warn(`TRIX URL ${iconCSS}`);
-      console.warn(`TRIX URL ${UI.getIconCSS("mod-firaxis")}`);
+      // special cases
+      const isModType = ["mod", "mod-firaxis", "mod-workshop"].includes(icon);
+      const isLarge = isModType;
+      const isMedium = false;
       // icon dimensions and crop circle
-      const maxSize = 100;
-      const maxCrop = 87;
+      const maxSize = isLarge ? 66.667 : isMedium ? 75 : 100;
+      const maxCrop = 85;
       const iconScale = parseFloat(Modding.getModProperty(mod.handle, "bzIconScale"));
       const iconCrop = parseFloat(Modding.getModProperty(mod.handle, "bzIconCrop"));
-      const size = Number.isNaN(iconScale) ? 66.667 : Math.min(iconScale, maxSize);
-      const crop = Number.isNaN(iconCrop) ? maxCrop : Math.min(iconCrop, maxCrop);
+      const fit = (n, max) => Number.isNaN(n) ? max : Math.min(n, max);
+      const size = fit(iconScale, maxSize);
+      const crop = fit(iconCrop, maxCrop);
       const scaleCrop = Math.floor(crop * 100 / size / 2);
       const margin = 50 - size / 2;
       this.modTypeIcon.style.widthPERCENT = size;
@@ -320,12 +322,11 @@ class ModsContent extends Panel {
       this.modTypeIcon.style.backgroundImage = iconCSS;
 
       // special case for mod icons
-      if (["mod", "mod-firaxis", "mod-workshop"].includes(icon)) {
+      if (isModType) {
+        // get color adjustments
         styleTypeIcon(this.modTypeIcon, icon);
         // adjust centering for better visual balance within frame
-        // this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 16;
         this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 32;
-        // this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 64;
       }
 
       // TODO: drop shadow

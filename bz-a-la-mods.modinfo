@@ -19,7 +19,6 @@
         <bzIcon>blp:fi_Yield_Happiness_128</bzIcon>
         <bzIcon>blp:fi_yield_diplomacy_128</bzIcon>
         <bzIcon>blp:city_buildingslist</bzIcon>
-        <bzIconScale>100</bzIconScale>
         <bzIconCrop>75</bzIconCrop>
         -->
     </Properties>
