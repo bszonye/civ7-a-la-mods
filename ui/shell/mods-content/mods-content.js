@@ -71,6 +71,7 @@ class ModsContent extends Panel {
     super.onInitialize();
     this.Root.innerHTML = this.getContent();
     this.mainSlot = MustGetElement(".additional-content-mods", this.Root);
+    this.modTypeIconCrop = MustGetElement(".mod-type-icon-crop", this.Root);
     this.modTypeIconBG = MustGetElement(".mod-type-icon-bg", this.Root);
     this.modTypeIcon = MustGetElement(".mod-type-icon", this.Root);
     this.modNameHeader = MustGetElement(".selected-mod-name", this.Root);
@@ -101,8 +102,10 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
-							<div class="mod-type-icon-bg relative size-16 bg-contain bg-center bg-no-repeat self-center mb-3">
-								<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
+							<div class="mod-type-icon-crop relative size-20 border-0 self-center mb-3">
+								<div class="mod-type-icon-bg absolute size-20 border-0 bg-contain bg-center bg-no-repeat">
+									<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
+								</div>
 							</div>
 							<fxs-header filigree-style="none"
 										class="selected-mod-name relative flex justify-center font-title text-2xl uppercase text-secondary mb-3"></fxs-header>
@@ -293,6 +296,7 @@ class ModsContent extends Panel {
       return;
     }
     const mod = this.selectedMod;
+    const isDebug = Modding.getModProperty(mod.handle, "bzIconDebug");
     const icon = Modding.getModProperty(mod.handle, "bzIcon");
     const iconCSS = icon?.startsWith("blp:") ? `url(${icon})` : UI.getIconCSS(icon);
     if (iconCSS) {
@@ -328,18 +332,6 @@ class ModsContent extends Panel {
         // adjust centering for better visual balance within frame
         this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 32;
       }
-
-      // TODO: drop shadow
-      // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(6px 6px black) drop-shadow(6px 6px 12px black)";  // size-128
-
-      // debug mode with clean background and crop marks
-      if (Modding.getModProperty(mod.handle, "bzIconDebug")) {
-        this.modTypeIconBG.classList.remove("size-16");
-        this.modTypeIconBG.classList.add("size-128");
-        this.modTypeIconBG.style.backgroundColor = "black";
-        this.modTypeIconBG.style.filter = "drop-shadow(6px 6px magenta) drop-shadow(-6px -6px magenta)";
-        this.modTypeIconBG.style.margin = "6px";
-      }
     } else {
       this.modTypeIconBG.style.backgroundImage = null;
       this.modTypeIcon.style.widthPERCENT = 100;
@@ -349,6 +341,43 @@ class ModsContent extends Panel {
       this.modTypeIcon.style.clipPath = null;
       styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
     }
+
+    // TODO: sanitize data
+    const glow = Modding.getModProperty(mod.handle, "bzIconGlow");
+    const cropSize = isDebug ? 512/18 : 80/18;
+    const ringSize = 4/5 * cropSize;
+    const borderWidth = glow ? ringSize / 32 : 0;
+    const boxSize = ringSize + 2*borderWidth;
+    const glowMargin = (cropSize - boxSize) / 2;
+    this.modTypeIconBG.style.width =
+      this.modTypeIconBG.style.height = `${boxSize}rem`;
+    this.modTypeIconBG.style.borderWidth = `${borderWidth}rem`;
+    this.modTypeIconBG.style.margin = `${glowMargin}rem`;
+    if (glow) {
+      console.warn(`TRIX SIZE ${cropSize} ${ringSize}`);
+      const blurRadius = 10/3*borderWidth;
+      const spreadRadius = 4/3*borderWidth;
+      const glowSize = blurRadius/2 + spreadRadius;
+      console.warn(`TRIX GLOW ${glowSize} ${glowMargin}`);
+      this.modTypeIconBG.style.backgroundColor = "black";
+      this.modTypeIconBG.style.borderColor = glow;
+      this.modTypeIconBG.style.borderRadius = "50%";
+      this.modTypeIconBG.style.boxShadow =
+        `0 0 ${blurRadius}rem ${spreadRadius}rem ${glow}`;
+    } else {
+      this.modTypeIconBG.style.backgroundColor = null;
+      this.modTypeIconBG.style.borderColor = null;
+      this.modTypeIconBG.style.borderRadius = null;
+      this.modTypeIconBG.style.boxShadow = null;
+    }
+
+    // crop marks
+    const cropmarkWidth = isDebug ? 3/18 : 0;
+    this.modTypeIconCrop.style.borderColor = "magenta";
+    this.modTypeIconCrop.style.borderWidth = `${cropmarkWidth}rem`;
+    this.modTypeIconCrop.style.width =
+      this.modTypeIconCrop.style.height = `${cropSize + 2*cropmarkWidth}rem`;
+    this.modTypeIconCrop.style.backgroundColor = isDebug ? "black" : "transparent";
 
     this.modNameHeader.setAttribute("title", mod.name);
     const authorElement = this.Root.querySelector(".mod-author");
