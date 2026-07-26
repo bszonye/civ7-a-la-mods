@@ -306,6 +306,7 @@ class ModsContent extends Panel {
       this.modTypeIcon.style.leftPERCENT = margin;
       this.modTypeIcon.style.topPERCENT = margin;
       this.modTypeIcon.style.clipPath = `circle(${scaleCrop}% at center)`;
+      this.modTypeIcon.style.filter = null;
 
       // icon images
       this.modTypeIconBG.style.backgroundImage = "url(blp:buildicon_open)";
@@ -558,6 +559,9 @@ Controls.define("mods-content", {
   ],
   images: [
     "blp:buildicon_open",
+    "blp:mod_firaxis",
+    "blp:mod_other",
+    "blp:mod_workshop",
   ],
   tabIndex: -1
 });
