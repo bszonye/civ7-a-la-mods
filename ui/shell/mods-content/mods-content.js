@@ -9,11 +9,13 @@ function styleTypeIcon(icon, type) {
   const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
   switch (type) {
     case "OfficialContent":
+    case "mod-firaxis":
       icon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
       icon.style.filter =
         `brightness(1.25) contrast(1.25) ${shadow}`;
       break;
     case "SteamWorkshopContent":
+    case "mod-workshop":
       icon.style.backgroundImage = UI.getIconCSS("mod-workshop");
       icon.style.filter =
         `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
@@ -98,7 +100,7 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
-							<div class="mod-type-icon-bg relative size-64 bg-contain bg-center bg-no-repeat self-center mb-3">
+							<div class="mod-type-icon-bg relative size-16 bg-contain bg-center bg-no-repeat self-center mb-3">
 								<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
 							</div>
 							<fxs-header filigree-style="none"
@@ -284,51 +286,60 @@ class ModsContent extends Panel {
       return;
     }
     const mod = this.selectedMod;
-    this.modTypeIconBG.style.backgroundImage = UI.getIconCSS("BUILDING_OPEN");
+    const icon = Modding.getModProperty(mod.handle, "bzIcon");
+    const iconCSS = icon?.startsWith("blp:") ? `url(${icon})` : UI.getIconCSS(icon);
+    if (iconCSS) {
+      // icon path
+      console.warn(`TRIX URL ${iconCSS}`);
+      console.warn(`TRIX URL ${UI.getIconCSS("mod-firaxis")}`);
+      // icon dimensions and crop circle
+      const maxSize = 100;
+      const maxCrop = 87;
+      const iconScale = parseFloat(Modding.getModProperty(mod.handle, "bzIconScale"));
+      const iconCrop = parseFloat(Modding.getModProperty(mod.handle, "bzIconCrop"));
+      const size = Number.isNaN(iconScale) ? 66.667 : Math.min(iconScale, maxSize);
+      const crop = Number.isNaN(iconCrop) ? maxCrop : Math.min(iconCrop, maxCrop);
+      const scaleCrop = Math.floor(crop * 100 / size / 2);
+      const margin = 50 - size / 2;
+      this.modTypeIcon.style.widthPERCENT = size;
+      this.modTypeIcon.style.heightPERCENT = size;
+      this.modTypeIcon.style.leftPERCENT = margin;
+      this.modTypeIcon.style.topPERCENT = margin;
+      this.modTypeIcon.style.clipPath = `circle(${scaleCrop}% at center)`;
 
-    // TODO: clean background and crop marks
-    this.modTypeIconBG.style.backgroundColor = "black";
-    this.modTypeIconBG.style.filter = "drop-shadow(6px 6px magenta) drop-shadow(-6px -6px magenta)";
-    this.modTypeIconBG.style.margin = "6px";
+      // icon images
+      this.modTypeIconBG.style.backgroundImage = "url(blp:buildicon_open)";
+      this.modTypeIcon.style.backgroundImage = iconCSS;
 
-    // styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
+      // special case for mod icons
+      if (["mod", "mod-firaxis", "mod-workshop"].includes(icon)) {
+        styleTypeIcon(this.modTypeIcon, icon);
+        // adjust centering for better visual balance within frame
+        // this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 16;
+        this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 32;
+        // this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 64;
+      }
 
-    // TODO: alternate icons
-    // this.modTypeIcon.style.backgroundImage = "url(blp:city_buildingslist)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_action_found_city_128)";
-    this.modTypeIcon.style.backgroundImage = "url(blp:fi_city_urban_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Food_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Production_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Gold_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Science_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Culture_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_Yield_Happiness_128)";
-    // this.modTypeIcon.style.backgroundImage = "url(blp:fi_yield_diplomacy_128)";
-    // this.modTypeIcon.style.backgroundColor = "magenta";
+      // TODO: drop shadow
+      // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(6px 6px black) drop-shadow(6px 6px 12px black)";  // size-128
 
-    // TODO: drop shadow
-    this.modTypeIcon.style.filter = "drop-shadow(3px 3px 6px black)";  // size-128, blur only
-    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(6px 6px black) drop-shadow(6px 6px 12px black)";  // size-128
-    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(3px 3px black) drop-shadow(3px 3px 6px black)";  // size-64
-    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(2px 2px black) drop-shadow(2px 2px 3px black)";  // size-32
-    // this.modTypeIcon.style.filter = "drop-shadow(-1px -1px black) drop-shadow(1px 1px black) drop-shadow(1px 1px 2px black)";  // size-16
-
-    // TODO: two-thirds fit (yield fonticons)
-    this.modTypeIcon.style.widthPERCENT = 66.666;
-    this.modTypeIcon.style.heightPERCENT = 66.666;
-    this.modTypeIcon.style.leftPERCENT = 16.667;
-    this.modTypeIcon.style.topPERCENT = 16.667;
-    this.modTypeIcon.style.clipPath = "circle(65% at center)";
-
-    // TODO: three-quarter fit
-    // this.modTypeIcon.style.widthPERCENT = 75;
-    // this.modTypeIcon.style.heightPERCENT = 75;
-    // this.modTypeIcon.style.leftPERCENT = 12.5;
-    // this.modTypeIcon.style.topPERCENT = 12.5;
-    // this.modTypeIcon.style.clipPath = "circle(58% at center)";
-
-    // TODO: three-quarter crop (list button icons)
-    // this.modTypeIcon.style.clipPath = "circle(37% at center)";
+      // debug mode with clean background and crop marks
+      if (Modding.getModProperty(mod.handle, "bzIconDebug")) {
+        this.modTypeIconBG.classList.remove("size-16");
+        this.modTypeIconBG.classList.add("size-128");
+        this.modTypeIconBG.style.backgroundColor = "black";
+        this.modTypeIconBG.style.filter = "drop-shadow(6px 6px magenta) drop-shadow(-6px -6px magenta)";
+        this.modTypeIconBG.style.margin = "6px";
+      }
+    } else {
+      this.modTypeIconBG.style.backgroundImage = null;
+      this.modTypeIcon.style.widthPERCENT = 100;
+      this.modTypeIcon.style.heightPERCENT = 100;
+      this.modTypeIcon.style.leftPERCENT = 0;
+      this.modTypeIcon.style.topPERCENT = 0;
+      this.modTypeIcon.style.clipPath = null;
+      styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
+    }
 
     this.modNameHeader.setAttribute("title", mod.name);
     const authorElement = this.Root.querySelector(".mod-author");
@@ -544,6 +555,9 @@ Controls.define("mods-content", {
       name: "show-not-owned-content",
       description: "should we show the not owned content (default: false)"
     }
+  ],
+  images: [
+    "blp:buildicon_open",
   ],
   tabIndex: -1
 });
