@@ -102,8 +102,8 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
-							<div class="mod-type-icon-crop relative size-20 border-0 self-center mb-3">
-								<div class="mod-type-icon-bg absolute size-20 border-0 bg-contain bg-center bg-no-repeat">
+							<div class="mod-type-icon-crop relative size-24 border-0 self-center mb-3">
+								<div class="mod-type-icon-bg absolute size-24 border-0 bg-contain bg-center bg-no-repeat">
 									<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
 								</div>
 							</div>
@@ -344,9 +344,9 @@ class ModsContent extends Panel {
 
     // TODO: sanitize data
     const glow = Modding.getModProperty(mod.handle, "bzIconGlow");
-    const cropSize = isDebug ? 512/18 : 80/18;
-    const ringSize = 4/5 * cropSize;
-    const borderWidth = glow ? ringSize / 32 : 0;
+    const cropSize = isDebug ? 512/18 : 96/18;
+    const ringSize = 2/3 * cropSize;
+    const borderWidth = glow ? ringSize / 16 : 0;
     const boxSize = ringSize + 2*borderWidth;
     const glowMargin = (cropSize - boxSize) / 2;
     this.modTypeIconBG.style.width =
