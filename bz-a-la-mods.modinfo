@@ -8,7 +8,7 @@
         <Package>Mod</Package>
         <AffectsSavedGames>0</AffectsSavedGames>
         <bzIcon>mod</bzIcon>
-        <bzIconGlow>#fac</bzIconGlow>
+        <bzIconGlow>#ffbbdd</bzIconGlow>
         <!--
         <bzIconDebug>true</bzIconDebug>
         <bzIcon>blp:fi_city_urban_128</bzIcon>
