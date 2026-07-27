@@ -305,13 +305,13 @@ class ModsContent extends Panel {
       const isLarge = isModType;
       const isMedium = false;
       // icon dimensions and crop circle
-      const maxSize = isLarge ? 66.667 : isMedium ? 75 : 100;
-      const maxCrop = 85;
+      const size0 = isLarge ? 66.667 : isMedium ? 75 : 100;
+      const crop0 = 85;
       const iconScale = parseFloat(Modding.getModProperty(mod.handle, "bzIconScale"));
       const iconCrop = parseFloat(Modding.getModProperty(mod.handle, "bzIconCrop"));
-      const fit = (n, max) => Number.isNaN(n) ? max : Math.min(n, max);
-      const size = fit(iconScale, maxSize);
-      const crop = fit(iconCrop, maxCrop);
+      const fit = (n, n0, max) => Number.isNaN(n) ? n0 : Math.min(n, max);
+      const size = fit(iconScale, size0, 100);
+      const crop = fit(iconCrop, crop0, 150);
       const scaleCrop = Math.floor(crop * 100 / size / 2);
       const margin = 50 - size / 2;
       this.modTypeIcon.style.widthPERCENT = size;
