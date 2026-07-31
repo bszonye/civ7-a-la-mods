@@ -6,6 +6,9 @@ import { MustGetElement } from '../../utilities/utilities-dom.js';
 import { FocusManager } from '../../../ui-next/services/focus-manager.js';
 import { ComponentUtilities } from '../../../ui-next/utilities/component-utilities.js';
 
+// space separator (ideographic or no-break)
+const BZ_SPACE_JOINER = Locale.getCurrentDisplayLocale().startsWith("zh_") ?  "　" : " ";
+
 function styleTypeIcon(icon, type) {
   const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
   switch (type) {
@@ -41,7 +44,7 @@ function compareInstalledMods(a, b) {
   return true;
 }
 class ModsContent extends Panel {
-  bzModAffectsSavedGame;
+  bzModAffectsSavedGames;
   mainSlot;
   modEntries;
   modNameHeader;
@@ -75,10 +78,13 @@ class ModsContent extends Panel {
     this.modTypeIconBG = MustGetElement(".mod-type-icon-bg", this.Root);
     this.modTypeIcon = MustGetElement(".mod-type-icon", this.Root);
     this.modNameHeader = MustGetElement(".selected-mod-name", this.Root);
-    this.modDateText = MustGetElement(".mod-date", this.Root);
     this.modDescriptionText = MustGetElement(".mod-description", this.Root);
+    this.bzModID = MustGetElement(".mod-id", this.Root);
+    this.bzModVersion = MustGetElement(".mod-version", this.Root);
+    this.bzModAuthor = MustGetElement(".mod-author", this.Root);
+    this.modDateText = MustGetElement(".mod-date", this.Root);
+    this.bzModAffectsSavedGames = MustGetElement(".mod-affects-saved-games", this.Root);
     this.modDependenciesContent = MustGetElement(".mod-dependencies", this.Root);
-    this.bzModAffectsSavedGame = MustGetElement(".mod-affects-saved-game", this.Root);
     this.modsEnableAll = MustGetElement(".mods-enable-all", this.Root);
     this.modsDisableUser = MustGetElement(".mods-disable-user", this.Root);
     if (Modding.userModSupportAvailable()) {
@@ -110,9 +116,13 @@ class ModsContent extends Panel {
 							<fxs-header filigree-style="none"
 										class="selected-mod-name relative flex justify-center font-title text-2xl uppercase text-secondary mb-3"></fxs-header>
 							<p class="mod-description text-lg my-6"></p>
-							<p class="mod-author relative text-lg"></p>
-							<p class="mod-date relative flex text-lg"></p>
-							<p class="mod-affects-saved-game text-lg"></p>
+							<p cohinline class="relative text-base">
+								<span class="mod-id font-bold"></span>
+								<span class="mod-version"></span>
+							</p>
+							<p class="mod-author relative text-base"></p>
+							<p class="mod-date relative flex text-base"></p>
+							<p class="mod-affects-saved-games text-base"></p>
 							<fxs-vslot class="mod-dependencies hidden">
 								<fxs-header filigree-style="none"
 											class="mod-dependencies-title relative flex font-title text-lg uppercase text-secondary mb-3"
@@ -354,11 +364,9 @@ class ModsContent extends Panel {
     this.modTypeIconBG.style.borderWidth = `${borderWidth}rem`;
     this.modTypeIconBG.style.margin = `${glowMargin}rem`;
     if (glow) {
-      console.warn(`TRIX SIZE ${cropSize} ${ringSize}`);
       const blurRadius = 10/3*borderWidth;
       const spreadRadius = 4/3*borderWidth;
-      const glowSize = blurRadius/2 + spreadRadius;
-      console.warn(`TRIX GLOW ${glowSize} ${glowMargin}`);
+      // const glowSize = blurRadius/2 + spreadRadius;
       this.modTypeIconBG.style.backgroundColor = "black";
       this.modTypeIconBG.style.borderColor = glow;
       this.modTypeIconBG.style.borderRadius = "50%";
@@ -380,27 +388,20 @@ class ModsContent extends Panel {
     this.modTypeIconCrop.style.backgroundColor = isDebug ? "black" : "transparent";
 
     this.modNameHeader.setAttribute("title", mod.name);
-    const authorElement = this.Root.querySelector(".mod-author");
-    if (authorElement) {
-      if (!mod.official) {
-        const author = Modding.getModProperty(mod.handle, "Authors");
-        if (author) {
-          authorElement.textContent = Locale.compose("LOC_UI_MOD_AUTHOR", author);
-        } else {
-          authorElement.textContent = "";
-        }
-      } else {
-        authorElement.textContent = "";
-      }
-    }
-    if (mod.created) {
-      this.modDateText.textContent = Locale.compose("LOC_UI_MOD_DATE", mod.created);
-    }
+    this.modDescriptionText.setAttribute("data-l10n-id", mod.description);
+    this.bzModID.textContent = mod.id;
+    const modVersion = Modding.getModProperty(mod.handle, "Version");
+    this.bzModVersion.textContent = modVersion ?
+        BZ_SPACE_JOINER + modVersion : "";
+    const author = Modding.getModProperty(mod.handle, "Authors");
+    this.bzModAuthor.textContent = author ?
+        Locale.compose("LOC_UI_MOD_AUTHOR", author) : "";
+    this.modDateText.textContent = mod.created ?
+        Locale.compose("LOC_UI_MOD_DATE", mod.created) : "";
     const affectsSave = Modding.getModProperty(mod.handle, "AffectsSavedGames");
-    this.bzModAffectsSavedGame.textContent =
+    this.bzModAffectsSavedGames.textContent =
       Locale.compose("LOC_UI_AFFECTS_SAVE") + " " +
       Locale.compose(affectsSave === "0" ? "LOC_GENERIC_NO" : "LOC_GENERIC_YES");
-    this.modDescriptionText.setAttribute("data-l10n-id", mod.description);
     if (mod.dependsOn) {
       this.modDependenciesContent.classList.remove("hidden");
       mod.dependsOn.forEach((dependecy) => {
