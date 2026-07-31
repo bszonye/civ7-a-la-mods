@@ -4,16 +4,22 @@ import NavTray from '../../navigation-tray/model-navigation-tray.js';
 import Panel from '../../panel-support.js';
 import { MustGetElement } from '../../utilities/utilities-dom.js';
 import { FocusManager } from '../../../ui-next/services/focus-manager.js';
+import { ComponentUtilities } from '../../../ui-next/utilities/component-utilities.js';
+
+// space separator (ideographic or no-break)
+const BZ_SPACE_JOINER = Locale.getCurrentDisplayLocale().startsWith("zh_") ?  "　" : " ";
 
 function styleTypeIcon(icon, type) {
   const shadow = "drop-shadow(0 0.0555555556rem 0.1111111111rem black)";
   switch (type) {
     case "OfficialContent":
+    case "mod-firaxis":
       icon.style.backgroundImage = UI.getIconCSS("mod-firaxis");
       icon.style.filter =
         `brightness(1.25) contrast(1.25) ${shadow}`;
       break;
     case "SteamWorkshopContent":
+    case "mod-workshop":
       icon.style.backgroundImage = UI.getIconCSS("mod-workshop");
       icon.style.filter =
         `fxs-color-tint(#ccf) brightness(1.25) contrast(2) ${shadow}`;
@@ -38,7 +44,7 @@ function compareInstalledMods(a, b) {
   return true;
 }
 class ModsContent extends Panel {
-  bzModAffectsSavedGame;
+  bzModAffectsSavedGames;
   mainSlot;
   modEntries;
   modNameHeader;
@@ -68,12 +74,17 @@ class ModsContent extends Panel {
     super.onInitialize();
     this.Root.innerHTML = this.getContent();
     this.mainSlot = MustGetElement(".additional-content-mods", this.Root);
+    this.modTypeIconCrop = MustGetElement(".mod-type-icon-crop", this.Root);
+    this.modTypeIconBG = MustGetElement(".mod-type-icon-bg", this.Root);
     this.modTypeIcon = MustGetElement(".mod-type-icon", this.Root);
     this.modNameHeader = MustGetElement(".selected-mod-name", this.Root);
-    this.modDateText = MustGetElement(".mod-date", this.Root);
     this.modDescriptionText = MustGetElement(".mod-description", this.Root);
+    this.bzModID = MustGetElement(".mod-id", this.Root);
+    this.bzModVersion = MustGetElement(".mod-version", this.Root);
+    this.bzModAuthor = MustGetElement(".mod-author", this.Root);
+    this.modDateText = MustGetElement(".mod-date", this.Root);
+    this.bzModAffectsSavedGames = MustGetElement(".mod-affects-saved-games", this.Root);
     this.modDependenciesContent = MustGetElement(".mod-dependencies", this.Root);
-    this.bzModAffectsSavedGame = MustGetElement(".mod-affects-saved-game", this.Root);
     this.modsEnableAll = MustGetElement(".mods-enable-all", this.Root);
     this.modsDisableUser = MustGetElement(".mods-disable-user", this.Root);
     if (Modding.userModSupportAvailable()) {
@@ -97,13 +108,21 @@ class ModsContent extends Panel {
 					</fxs-vslot>
 					<fxs-vslot class="w-1\\/2">
 						<fxs-scrollable class="mod-details-scrollable flex-auto my-6 mx-6 px-4">
-							<p class="mod-type-icon size-12 bg-contain bg-center bg-no-repeat self-center mb-3"></p>
+							<div class="mod-type-icon-crop relative size-24 border-0 self-center mb-3">
+								<div class="mod-type-icon-bg absolute size-24 border-0 bg-contain bg-center bg-no-repeat">
+									<p class="mod-type-icon absolute size-full bg-contain bg-center bg-no-repeat"></p>
+								</div>
+							</div>
 							<fxs-header filigree-style="none"
 										class="selected-mod-name relative flex justify-center font-title text-2xl uppercase text-secondary mb-3"></fxs-header>
 							<p class="mod-description text-lg my-6"></p>
-							<p class="mod-author relative text-lg"></p>
-							<p class="mod-date relative flex text-lg"></p>
-							<p class="mod-affects-saved-game text-lg"></p>
+							<p cohinline class="relative text-base">
+								<span class="mod-id font-bold"></span>
+								<span class="mod-version"></span>
+							</p>
+							<p class="mod-author relative text-base"></p>
+							<p class="mod-date relative flex text-base"></p>
+							<p class="mod-affects-saved-games text-base"></p>
 							<fxs-vslot class="mod-dependencies hidden">
 								<fxs-header filigree-style="none"
 											class="mod-dependencies-title relative flex font-title text-lg uppercase text-secondary mb-3"
@@ -177,6 +196,7 @@ class ModsContent extends Panel {
         this.selectedModHandle = this.selectedMod?.handle ?? null;
       }
       // only show the requested (un)official half of the list
+      const icons = [];
       installedMods = installedMods.filter((m) => m.official == official);
       installedMods.forEach((mod, index) => {
         const globalIndex = baseIndex + index;
@@ -229,7 +249,13 @@ class ModsContent extends Panel {
         modTextContainer.appendChild(modName);
         modentry.appendChild(modTextContainer);
         modentry.appendChild(checkbox);
+        // preload icons
+        const icon = Modding.getModProperty(mod.handle, "bzIcon");
+        const iconBLP = icon?.match(/^blp:\w+$/) ?
+          icon : UI.getIconBLP(icon, "FONTICON");
+        if (iconBLP) icons.push(iconBLP);
       });
+      ComponentUtilities.preloadImages(...icons);
     }
   }
   onAttach() {
@@ -281,29 +307,103 @@ class ModsContent extends Panel {
       return;
     }
     const mod = this.selectedMod;
-    styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
-    this.modNameHeader.setAttribute("title", mod.name);
-    const authorElement = this.Root.querySelector(".mod-author");
-    if (authorElement) {
-      if (!mod.official) {
-        const author = Modding.getModProperty(mod.handle, "Authors");
-        if (author) {
-          authorElement.textContent = Locale.compose("LOC_UI_MOD_AUTHOR", author);
-        } else {
-          authorElement.textContent = "";
-        }
-      } else {
-        authorElement.textContent = "";
+    const isDebug = Modding.getModProperty(mod.handle, "bzIconDebug");
+    const icon = Modding.getModProperty(mod.handle, "bzIcon");
+    const iconCSS = icon?.match(/^blp:\w+$/) ?
+      `url(${icon})` :  // url(blp:...) if a valid blp path is given, otherwise
+      UI.getIconCSS(icon, "FONTICON");  // use high-resolution font icons where possible
+    if (iconCSS) {
+      // special cases
+      const isModType = ["mod", "mod-firaxis", "mod-workshop"].includes(icon);
+      const isLarge = isModType;
+      const isMedium = false;
+      // icon dimensions and crop circle
+      const size0 = isLarge ? 66.667 : isMedium ? 75 : 100;
+      const crop0 = 85;
+      const iconScale = parseFloat(Modding.getModProperty(mod.handle, "bzIconScale"));
+      const iconCrop = parseFloat(Modding.getModProperty(mod.handle, "bzIconCrop"));
+      const fit = (n, n0, max) => Number.isNaN(n) ? n0 : Math.min(n, max);
+      const size = fit(iconScale, size0, 100);
+      const crop = fit(iconCrop, crop0, 150);
+      const scaleCrop = Math.floor(crop * 100 / size / 2);
+      const margin = 50 - size / 2;
+      this.modTypeIcon.style.widthPERCENT = size;
+      this.modTypeIcon.style.heightPERCENT = size;
+      this.modTypeIcon.style.leftPERCENT = margin;
+      this.modTypeIcon.style.topPERCENT = margin;
+      this.modTypeIcon.style.clipPath = `circle(${scaleCrop}% at center)`;
+      this.modTypeIcon.style.filter = null;
+
+      // icon images
+      this.modTypeIconBG.style.backgroundImage = "url(blp:buildicon_open)";
+      this.modTypeIcon.style.backgroundImage = iconCSS;
+
+      // special case for mod icons
+      if (isModType) {
+        // get color adjustments
+        styleTypeIcon(this.modTypeIcon, icon);
+        // adjust centering for better visual balance within frame
+        this.modTypeIcon.style.leftPERCENT = 50 - size / 2 - size / 32;
       }
+    } else {
+      this.modTypeIconBG.style.backgroundImage = null;
+      this.modTypeIcon.style.widthPERCENT = 100;
+      this.modTypeIcon.style.heightPERCENT = 100;
+      this.modTypeIcon.style.leftPERCENT = 0;
+      this.modTypeIcon.style.topPERCENT = 0;
+      this.modTypeIcon.style.clipPath = null;
+      styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
     }
-    if (mod.created) {
-      this.modDateText.textContent = Locale.compose("LOC_UI_MOD_DATE", mod.created);
+
+    const glow = Modding.getModProperty(mod.handle, "bzIconGlow");
+    const cropSize = isDebug ? 512/36 : 96/18;
+    const ringSize = 2/3 * cropSize;
+    const borderWidth = glow ? ringSize / 16 : 0;
+    const boxSize = ringSize + 2*borderWidth;
+    const glowMargin = (cropSize - boxSize) / 2;
+    this.modTypeIconBG.style.width =
+      this.modTypeIconBG.style.height = `${boxSize}rem`;
+    this.modTypeIconBG.style.borderWidth = `${borderWidth}rem`;
+    this.modTypeIconBG.style.margin = `${glowMargin}rem`;
+    if (glow) {
+      const blurRadius = 10/3*borderWidth;
+      const spreadRadius = 4/3*borderWidth;
+      // const glowSize = blurRadius/2 + spreadRadius;
+      this.modTypeIconBG.style.backgroundColor = "black";
+      this.modTypeIconBG.style.borderColor = glow;
+      this.modTypeIconBG.style.borderRadius = "50%";
+      this.modTypeIconBG.style.boxShadow =
+        `0 0 ${blurRadius}rem ${spreadRadius}rem ${glow}`;
+    } else {
+      this.modTypeIconBG.style.backgroundColor = null;
+      this.modTypeIconBG.style.borderColor = null;
+      this.modTypeIconBG.style.borderRadius = null;
+      this.modTypeIconBG.style.boxShadow = null;
     }
+
+    // crop marks
+    const cropmarkWidth = isDebug ? 3/18 : 0;
+    this.modTypeIconCrop.style.borderColor = "magenta";
+    this.modTypeIconCrop.style.borderWidth = `${cropmarkWidth}rem`;
+    this.modTypeIconCrop.style.width =
+      this.modTypeIconCrop.style.height = `${cropSize + 2*cropmarkWidth}rem`;
+    this.modTypeIconCrop.style.backgroundColor = isDebug ? "black" : "transparent";
+
+    this.modNameHeader.setAttribute("title", mod.name);
+    this.modDescriptionText.setAttribute("data-l10n-id", mod.description);
+    this.bzModID.textContent = mod.id;
+    const modVersion = Modding.getModProperty(mod.handle, "Version");
+    this.bzModVersion.textContent = modVersion ?
+        BZ_SPACE_JOINER + modVersion : "";
+    const author = Modding.getModProperty(mod.handle, "Authors");
+    this.bzModAuthor.textContent = author ?
+        Locale.compose("LOC_UI_MOD_AUTHOR", author) : "";
+    this.modDateText.textContent = mod.created ?
+        Locale.compose("LOC_UI_MOD_DATE", mod.created) : "";
     const affectsSave = Modding.getModProperty(mod.handle, "AffectsSavedGames");
-    this.bzModAffectsSavedGame.textContent =
+    this.bzModAffectsSavedGames.textContent =
       Locale.compose("LOC_UI_AFFECTS_SAVE") + " " +
       Locale.compose(affectsSave === "0" ? "LOC_GENERIC_NO" : "LOC_GENERIC_YES");
-    this.modDescriptionText.setAttribute("data-l10n-id", mod.description);
     if (mod.dependsOn) {
       this.modDependenciesContent.classList.remove("hidden");
       mod.dependsOn.forEach((dependecy) => {
@@ -497,8 +597,15 @@ Controls.define("mods-content", {
       description: "should we show the not owned content (default: false)"
     }
   ],
+  images: [
+    "blp:buildicon_open",
+    "blp:mod_firaxis",
+    "blp:mod_other",
+    "blp:mod_workshop",
+  ],
   tabIndex: -1
 });
 
 export { ModsContent };
 //# sourceMappingURL=mods-content.js.map
+// vim: ts=2 sw=2 et
