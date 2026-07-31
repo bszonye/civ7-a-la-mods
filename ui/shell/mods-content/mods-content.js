@@ -355,7 +355,6 @@ class ModsContent extends Panel {
       styleTypeIcon(this.modTypeIcon, mod.subscriptionType);
     }
 
-    // TODO: sanitize data
     const glow = Modding.getModProperty(mod.handle, "bzIconGlow");
     const cropSize = isDebug ? 512/36 : 96/18;
     const ringSize = 2/3 * cropSize;
