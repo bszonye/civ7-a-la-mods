@@ -251,7 +251,8 @@ class ModsContent extends Panel {
         modentry.appendChild(checkbox);
         // preload icons
         const icon = Modding.getModProperty(mod.handle, "bzIcon");
-        const iconBLP = icon?.startsWith("blp:") ? icon : UI.getIconBLP(icon);
+        const iconBLP = icon?.match(/^blp:\w+$/) ?
+          icon : UI.getIconBLP(icon, "FONTICON");
         if (iconBLP) icons.push(iconBLP);
       });
       ComponentUtilities.preloadImages(...icons);
