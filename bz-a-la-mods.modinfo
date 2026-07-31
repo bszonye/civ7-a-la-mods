@@ -9,19 +9,6 @@
         <AffectsSavedGames>0</AffectsSavedGames>
         <bzIcon>mod</bzIcon>
         <bzIconGlow>#ffbbdd</bzIconGlow>
-        <!--
-        <bzIconDebug>true</bzIconDebug>
-        <bzIcon>blp:fi_city_urban_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Food_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Production_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Gold_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Science_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Culture_128</bzIcon>
-        <bzIcon>blp:fi_Yield_Happiness_128</bzIcon>
-        <bzIcon>blp:fi_yield_diplomacy_128</bzIcon>
-        <bzIcon>blp:city_buildingslist</bzIcon>
-        <bzIconCrop>75</bzIconCrop>
-        -->
     </Properties>
     <Dependencies>
         <Mod id="base-standard" title="LOC_MODULE_BASE_STANDARD_NAME" />
