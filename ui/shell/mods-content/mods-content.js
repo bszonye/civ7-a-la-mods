@@ -308,7 +308,7 @@ class ModsContent extends Panel {
     const mod = this.selectedMod;
     const isDebug = Modding.getModProperty(mod.handle, "bzIconDebug");
     const icon = Modding.getModProperty(mod.handle, "bzIcon");
-    const iconCSS = icon?.startsWith("blp:") ? `url(${icon})` : UI.getIconCSS(icon);
+    const iconCSS = icon?.match(/^blp:\w+$/) ? `url(${icon})` : UI.getIconCSS(icon);
     if (iconCSS) {
       // special cases
       const isModType = ["mod", "mod-firaxis", "mod-workshop"].includes(icon);
